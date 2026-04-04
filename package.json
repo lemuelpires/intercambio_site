@@ -1,0 +1,36 @@
+{
+  "name": "intercambio-site",
+  "version": "1.0.0",
+  "description": "Site de intercâmbio com galeria de fotos e vídeos",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "setup-server": "node setup-home-server.js",
+    "process-remote": "node remote-media-processor.js",
+    "process-media": "node media-processor.js",
+    "copy-media": "node copy-media.js",
+    "generate-thumbnails": "node generate-thumbnails.js",
+    "setup": "npm install && npm run copy-media && npm run process-media && npm run generate-thumbnails",
+    "setup-remote": "npm install && npm run setup-server && npm run process-remote",
+    "build-media": "npm run process-media && npm run generate-thumbnails",
+    "build-remote": "npm run process-remote",
+    "deploy": "firebase deploy",
+    "deploy:hosting": "firebase deploy --only hosting"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.22.0",
+    "sharp": "^0.33.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.2.1",
+    "http-server": "^14.1.1",
+    "vite": "^5.1.0"
+  },
+  "keywords": ["intercambio", "galeria", "fotos", "videos", "boston", "newyork"],
+  "author": "Lemuel",
+  "license": "MIT"
+}

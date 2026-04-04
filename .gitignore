@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# Build
+dist/
+
+# Mídias locais (grandes; regenere com copy-media / processadores)
+media/
+
+# Dados gerados localmente (opcional: versione só public/data se quiser)
+# data/
+
+# Logs e ambiente
+*.log
+.env
+.env.*
+
+# SO / IDE
+.DS_Store
+Thumbs.db
