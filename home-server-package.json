@@ -1,0 +1,17 @@
+{
+  "name": "intercambio-home-server",
+  "version": "1.0.0",
+  "description": "Servidor pessoal para mídias do intercâmbio",
+  "main": "home-server.js",
+  "scripts": {
+    "start": "node home-server.js",
+    "dev": "nodemon home-server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
