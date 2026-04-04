@@ -1,0 +1,36 @@
+{
+  "mediaBaseUrl": "https://www.portalmantec.com.br/galeria/",
+  "server": {
+    "baseUrl": "http://localhost:8080",
+    "mediaPath": "C:\\Users\\lemuel\\Desktop\\wordpress\\projetos Intercâmbio\\fotos Intercambio",
+    "thumbnailsPath": "/media/intercambio/thumbnails"
+  },
+  "devices": {
+    "Samsung A50": {
+      "name": "Samsung Galaxy A50",
+      "icon": "📱",
+      "color": "#1f2937"
+    },
+    "iPhone 16": {
+      "name": "iPhone 16",
+      "icon": "📱",
+      "color": "#374151"
+    },
+    "Desconhecido": {
+      "name": "Dispositivo Desconhecido",
+      "icon": "📷",
+      "color": "#6b7280"
+    }
+  },
+  "media": {
+    "supportedFormats": {
+      "images": [".jpg", ".jpeg", ".png", ".heic", ".webp"],
+      "videos": [".mp4", ".mov", ".avi", ".mkv"]
+    },
+    "thumbnailSize": {
+      "width": 400,
+      "height": 300,
+      "quality": 80
+    }
+  }
+}
