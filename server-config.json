@@ -1,0 +1,36 @@
+{
+  "port": 8080,
+  "baseUrl": "https://www.portalmantec.com.br",
+  "mediaPath": "C:\\Users\\lemuel\\Desktop\\wordpress\\projetos Intercâmbio\\fotos Intercambio",
+  "thumbnailsPath": "/media/intercambio/thumbnails",
+  "cors": {
+    "origin": "*",
+    "methods": [
+      "GET",
+      "HEAD",
+      "OPTIONS"
+    ],
+    "allowedHeaders": [
+      "Range",
+      "Content-Type"
+    ]
+  },
+  "cache": {
+    "maxAge": 31536000,
+    "etag": true
+  },
+  "devices": {
+    "Samsung A50": {
+      "name": "Samsung Galaxy A50",
+      "icon": "📱",
+      "color": "#1f2937",
+      "patterns": ["SAMSUNG", "A50", "^[0-9]{8}_[0-9]{6}"]
+    },
+    "iPhone 16": {
+      "name": "iPhone 16",
+      "icon": "📱",
+      "color": "#374151",
+      "patterns": ["IMG_", "VID_", "iPhone", "16"]
+    }
+  }
+}
