@@ -3,6 +3,7 @@ import Layout from './components/Layout'
 import Home from './pages/Home'
 import Boston from './pages/Boston'
 import NewYork from './pages/NewYork'
+import Retorno from './pages/Retorno'
 
 export default function App() {
   return (
@@ -11,6 +12,7 @@ export default function App() {
         <Route index element={<Home />} />
         <Route path="boston" element={<Boston />} />
         <Route path="newyork" element={<NewYork />} />
+        <Route path="retorno" element={<Retorno />} />
       </Route>
     </Routes>
   )

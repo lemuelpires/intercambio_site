@@ -9,6 +9,7 @@ export default function Header() {
           <NavLink to="/" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} end>Home</NavLink>
           <NavLink to="/boston" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>Boston</NavLink>
           <NavLink to="/newyork" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>New York</NavLink>
+          <NavLink to="/retorno" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>Volta ao Brasil</NavLink>
         </nav>
       </div>
     </header>

@@ -1,9 +1,10 @@
 {
-  "mediaBaseUrl": "https://www.portalmantec.com.br/galeria/",
+  "mediaBaseUrl": "https://www.portalmantec.com.br/galeria",
+  "useThumbnails": false,
   "server": {
     "baseUrl": "http://localhost:8080",
     "mediaPath": "C:\\Users\\lemuel\\Desktop\\wordpress\\projetos Intercâmbio\\fotos Intercambio",
-    "thumbnailsPath": "/media/intercambio/thumbnails"
+    "thumbnailsPath": "/galeria/thumbnails"
   },
   "devices": {
     "Samsung A50": {

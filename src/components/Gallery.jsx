@@ -1,21 +1,41 @@
-import { useState, useEffect } from 'react'
-import {
-  resolveMediaUrls,
-  getVideoMimeType,
-  formatDate,
-  CATEGORY_ICONS,
-  DEVICE_ICONS,
-} from '../utils/mediaUrl'
+import { useState, useEffect, useCallback } from 'react'
+import { resolveMediaUrls } from '../utils/mediaUrl'
 
 const ITEMS_PER_PAGE = 20
 
 export default function Gallery({ dataUrl, title, subtitle }) {
   const [config, setConfig] = useState(null)
   const [allItems, setAllItems] = useState([])
-  const [filter, setFilter] = useState('all')
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [lightboxItem, setLightboxItem] = useState(null)
+
+  const openLightbox = useCallback((item) => {
+    setLightboxItem(item)
+  }, [])
+
+  const closeLightbox = useCallback(() => {
+    setLightboxItem(null)
+  }, [])
+
+  useEffect(() => {
+    setLightboxItem(null)
+  }, [page])
+
+  useEffect(() => {
+    if (!lightboxItem) return undefined
+    const onKey = (e) => {
+      if (e.key === 'Escape') closeLightbox()
+    }
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', onKey)
+    return () => {
+      document.body.style.overflow = prevOverflow
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [lightboxItem, closeLightbox])
 
   useEffect(() => {
     let cancelled = false
@@ -31,7 +51,9 @@ export default function Gallery({ dataUrl, title, subtitle }) {
         const configData = configRes.ok ? await configRes.json() : {}
         const data = await dataRes.json()
         const rawItems = data.items || []
-        const base = configData.mediaBaseUrl
+        const rawBase = configData.mediaBaseUrl
+        const base =
+          typeof rawBase === 'string' && rawBase.trim() ? rawBase.trim() : undefined
         const items = resolveMediaUrls(rawItems, base)
         setConfig(configData)
         setAllItems(items)
@@ -45,26 +67,9 @@ export default function Gallery({ dataUrl, title, subtitle }) {
     return () => { cancelled = true }
   }, [dataUrl])
 
-  const filteredItems =
-    filter === 'all'
-      ? allItems
-      : filter === 'photo'
-        ? allItems.filter((i) => i.type === 'photo')
-        : filter === 'video'
-          ? allItems.filter((i) => i.type === 'video')
-          : allItems.filter((i) => i.device === filter)
-
-  const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE)
+  const totalPages = Math.ceil(allItems.length / ITEMS_PER_PAGE)
   const start = (page - 1) * ITEMS_PER_PAGE
-  const currentItems = filteredItems.slice(start, start + ITEMS_PER_PAGE)
-
-  const totalItems = allItems.length
-  const samsungCount = allItems.filter((i) => i.device === 'Samsung A50').length
-  const iphoneCount = allItems.filter((i) => i.device === 'iPhone 16').length
-
-  const getDeviceIcon = (device) =>
-    (config?.devices?.[device]?.icon) || DEVICE_ICONS[device] || '📷'
-  const getCategoryIcon = (cat) => CATEGORY_ICONS[cat] || '📸'
+  const currentItems = allItems.slice(start, start + ITEMS_PER_PAGE)
 
   if (error) {
     return (
@@ -91,37 +96,9 @@ export default function Gallery({ dataUrl, title, subtitle }) {
       <section className="page-hero container">
         <h1>{title}</h1>
         <p>{subtitle}</p>
-        <div className="stats" id="stats">
-          <div className="stat-item">
-            <span className="stat-number">{loading ? '-' : totalItems}</span>
-            <span className="stat-label">Total de mídias</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-number">{loading ? '-' : samsungCount}</span>
-            <span className="stat-label">Samsung A50</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-number">{loading ? '-' : iphoneCount}</span>
-            <span className="stat-label">iPhone 16</span>
-          </div>
-        </div>
       </section>
 
       <section className="gallery container">
-        <div className="gallery-filters">
-          {['all', 'Samsung A50', 'iPhone 16', 'photo', 'video'].map((f) => (
-            <button
-              key={f}
-              type="button"
-              className={`filter-btn ${filter === f ? 'active' : ''}`}
-              data-filter={f}
-              onClick={() => { setFilter(f); setPage(1) }}
-            >
-              {f === 'all' ? 'Todas' : f === 'photo' ? 'Fotos' : f === 'video' ? 'Vídeos' : f}
-            </button>
-          ))}
-        </div>
-
         {loading ? (
           <div className="loading" style={{ display: 'block' }}>
             <div className="spinner" />
@@ -131,48 +108,35 @@ export default function Gallery({ dataUrl, title, subtitle }) {
           <>
             <div id="gallery-container" className="gallery-grid">
               {currentItems.length === 0 ? (
-                <div className="no-items">Nenhuma mídia encontrada para o filtro selecionado.</div>
+                <div className="no-items">Nenhuma mídia encontrada.</div>
               ) : (
                 currentItems.map((item) => (
                   <figure
                     key={item.src + (item.filename || '')}
-                    className="gallery-item"
-                    data-device={item.device}
-                    data-type={item.type}
+                    className="gallery-item gallery-item--media-only"
                   >
                     {item.type === 'video' ? (
-                      <video className="gallery-media" controls preload="metadata">
-                        <source src={item.src} type={getVideoMimeType(item.src)} />
-                        Seu navegador não suporta vídeos.
-                      </video>
+                      <button
+                        type="button"
+                        className="gallery-media-trigger"
+                        onClick={() => openLightbox(item)}
+                        aria-label={`Ampliar vídeo: ${item.title}`}
+                      >
+                        <video
+                          className="gallery-media"
+                          muted
+                          playsInline
+                          preload="metadata"
+                          src={item.src}
+                        />
+                      </button>
                     ) : (
-                      <GalleryImage item={item} />
+                      <GalleryImage
+                        item={item}
+                        useThumbnails={config?.useThumbnails !== false}
+                        onOpen={openLightbox}
+                      />
                     )}
-                    <figcaption className="gallery-caption">
-                      <div className="gallery-title">{item.title}</div>
-                      <div className="gallery-meta">
-                        <span className="device-info">
-                          {getDeviceIcon(item.device)} {item.device}
-                        </span>
-                        <span className="category-info">
-                          {getCategoryIcon(item.category)} {item.category}
-                        </span>
-                        <span className="date-info">{formatDate(item.date)}</span>
-                      </div>
-                      <div className="gallery-actions">
-                        <button
-                          type="button"
-                          className="action-btn"
-                          onClick={() => window.open(item.src, '_blank')}
-                          title="Abrir em nova aba"
-                        >
-                          🔗
-                        </button>
-                        <button type="button" className="action-btn" title="Alternar tamanho">
-                          🔍
-                        </button>
-                      </div>
-                    </figcaption>
                   </figure>
                 ))
               )}
@@ -204,24 +168,69 @@ export default function Gallery({ dataUrl, title, subtitle }) {
           </>
         )}
       </section>
+
+      {lightboxItem ? (
+        <div
+          className="lightbox-backdrop"
+          role="presentation"
+          onClick={closeLightbox}
+        >
+          <button
+            type="button"
+            className="lightbox-close"
+            onClick={closeLightbox}
+            aria-label="Fechar"
+          >
+            ×
+          </button>
+          <div
+            className="lightbox-inner"
+            role="dialog"
+            aria-modal="true"
+            aria-label={lightboxItem.title}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {lightboxItem.type === 'video' ? (
+              <video
+                className="lightbox-media"
+                controls
+                autoPlay
+                playsInline
+                src={lightboxItem.src}
+              />
+            ) : (
+              <img
+                className="lightbox-media"
+                src={lightboxItem.src}
+                alt={lightboxItem.title}
+              />
+            )}
+          </div>
+        </div>
+      ) : null}
     </>
   )
 }
 
-function GalleryImage({ item }) {
-  const [useFull, setUseFull] = useState(false)
+function GalleryImage({ item, useThumbnails = true, onOpen }) {
   const [imgError, setImgError] = useState(false)
   const thumb = item.thumb || item.src
-  const src = imgError || useFull ? item.src : thumb
+  const gridSrc = !useThumbnails || imgError ? item.src : thumb
 
   return (
-    <img
-      className="gallery-media"
-      src={src}
-      alt={item.title}
-      loading="lazy"
-      onError={() => setImgError(true)}
-      onClick={() => setUseFull((u) => !u)}
-    />
+    <button
+      type="button"
+      className="gallery-media-trigger"
+      onClick={() => onOpen(item)}
+      aria-label={`Ampliar imagem: ${item.title}`}
+    >
+      <img
+        className="gallery-media"
+        src={gridSrc}
+        alt=""
+        loading="lazy"
+        onError={() => setImgError(true)}
+      />
+    </button>
   )
 }

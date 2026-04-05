@@ -1,8 +1,9 @@
 {
   "port": 8080,
   "baseUrl": "https://www.portalmantec.com.br",
+  "publicMediaPath": "/galeria",
   "mediaPath": "C:\\Users\\lemuel\\Desktop\\wordpress\\projetos Intercâmbio\\fotos Intercambio",
-  "thumbnailsPath": "/media/intercambio/thumbnails",
+  "thumbnailsPath": "/galeria/thumbnails",
   "cors": {
     "origin": "*",
     "methods": [

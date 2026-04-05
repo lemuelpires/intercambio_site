@@ -72,16 +72,29 @@ class RemoteMediaProcessor {
             .join('/');
     }
 
+    /** Prefixo público onde o Apache/Nginx expõe as mídias (ex.: /galeria ou /media/intercambio) */
+    getPublicMediaPrefix() {
+        const p = this.config.publicMediaPath || '/media/intercambio';
+        return p.startsWith('/') ? p : `/${p}`;
+    }
+
+    getPublicThumbnailsPrefix() {
+        if (this.config.thumbnailsPath && String(this.config.thumbnailsPath).startsWith('/')) {
+            return this.config.thumbnailsPath.replace(/\/$/, '');
+        }
+        return `${this.getPublicMediaPrefix()}/thumbnails`;
+    }
+
     generateServerUrl(relativePath) {
-        const baseUrl = this.config.baseUrl || `http://localhost:${this.config.port}`;
-        const mediaPath = '/media/intercambio';
+        const baseUrl = (this.config.baseUrl || `http://localhost:${this.config.port}`).replace(/\/$/, '');
+        const mediaPath = this.getPublicMediaPrefix();
         return `${baseUrl}${mediaPath}/${this.encodeUrlPathSegments(relativePath)}`;
     }
 
     // Gera URL do thumbnail
     generateThumbnailUrl(relativePath) {
-        const baseUrl = this.config.baseUrl || `http://localhost:${this.config.port}`;
-        const thumbnailsPath = '/media/intercambio/thumbnails';
+        const baseUrl = (this.config.baseUrl || `http://localhost:${this.config.port}`).replace(/\/$/, '');
+        const thumbnailsPath = this.getPublicThumbnailsPrefix();
         return `${baseUrl}${thumbnailsPath}/${this.encodeUrlPathSegments(relativePath)}`;
     }
 
@@ -263,7 +276,11 @@ class RemoteMediaProcessor {
 
     // Gera arquivo de configuração para o frontend
     generateFrontendConfig() {
+        const baseUrl = (this.config.baseUrl || `http://localhost:${this.config.port}`).replace(/\/$/, '');
+        const publicPrefix = this.getPublicMediaPrefix().replace(/^\//, '');
         const frontendConfig = {
+            mediaBaseUrl: `${baseUrl}/${publicPrefix}`,
+            useThumbnails: true,
             server: {
                 baseUrl: `http://localhost:${this.config.port}`,
                 mediaPath: this.config.mediaPath,

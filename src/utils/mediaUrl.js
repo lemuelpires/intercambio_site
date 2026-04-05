@@ -11,12 +11,19 @@ function resolveToBaseUrl(url, base) {
       return base + '/' + (pathSegment.includes('%') ? pathSegment : encodePath(pathSegment))
     }
   }
+  if (url.includes('portalmantec.com.br/galeria/')) {
+    const pathMatch = url.match(/portalmantec\.com\.br\/galeria\/(.+?)(?:\?|$)/)
+    if (pathMatch) {
+      const pathSegment = pathMatch[1]
+      return base + '/' + (pathSegment.includes('%') ? pathSegment : encodePath(pathSegment))
+    }
+  }
   return url
 }
 
 export function resolveMediaUrls(items, mediaBaseUrl) {
-  if (!mediaBaseUrl) return items
-  const base = mediaBaseUrl.replace(/\/$/, '')
+  if (mediaBaseUrl == null || String(mediaBaseUrl).trim() === '') return items
+  const base = String(mediaBaseUrl).replace(/\/$/, '')
 
   return items.map((item) => {
     const src = item.src || ''
