@@ -8,7 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "setup-server": "node setup-home-server.js",
-    "process-remote": "node remote-media-processor.js",
+    "process-remote": "node remote-media-processor.cjs",
     "process-media": "node media-processor.js",
     "copy-media": "node copy-media.js",
     "generate-thumbnails": "node generate-thumbnails.js",

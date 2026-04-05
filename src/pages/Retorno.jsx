@@ -1,6 +1,6 @@
 import Gallery from '../components/Gallery'
 
-export default function Boston() {
+export default function Retorno() {
   return (
     <Gallery
       dataUrl="/data/retorno.json"

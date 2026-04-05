@@ -1,6 +1,6 @@
 {
   "mediaBaseUrl": "https://www.portalmantec.com.br/galeria",
-  "useThumbnails": false,
+  "useThumbnails": true,
   "server": {
     "baseUrl": "http://localhost:8080",
     "mediaPath": "C:\\Users\\lemuel\\Desktop\\wordpress\\projetos Intercâmbio\\fotos Intercambio",
@@ -25,8 +25,19 @@
   },
   "media": {
     "supportedFormats": {
-      "images": [".jpg", ".jpeg", ".png", ".heic", ".webp"],
-      "videos": [".mp4", ".mov", ".avi", ".mkv"]
+      "images": [
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".heic",
+        ".webp"
+      ],
+      "videos": [
+        ".mp4",
+        ".mov",
+        ".avi",
+        ".mkv"
+      ]
     },
     "thumbnailSize": {
       "width": 400,

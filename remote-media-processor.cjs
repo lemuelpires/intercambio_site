@@ -6,6 +6,7 @@ class RemoteMediaProcessor {
         this.config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
         this.processedData = {
             boston: { items: [] },
+            retorno: { items: [] },
             newyork: { items: [] }
         };
     }
@@ -198,13 +199,22 @@ class RemoteMediaProcessor {
             this.processFolder(newyorkPath, 'newyork');
         }
 
+        // Processa Retorno
+        const retornoPath = path.join(this.config.mediaPath, 'Retorno');
+        if (fs.existsSync(retornoPath)) {
+            console.log('Processando Retorno...');
+            this.processFolder(retornoPath, 'retorno');
+        }
+
         // Ordena por data
         this.processedData.boston.items.sort((a, b) => new Date(b.date) - new Date(a.date));
         this.processedData.newyork.items.sort((a, b) => new Date(b.date) - new Date(a.date));
+        this.processedData.retorno.items.sort((a, b) => new Date(b.date) - new Date(a.date));
 
         console.log(`Processamento concluído!`);
         console.log(`Boston: ${this.processedData.boston.items.length} itens`);
         console.log(`New York: ${this.processedData.newyork.items.length} itens`);
+        console.log(`Retorno: ${this.processedData.retorno.items.length} itens`);
 
         return this.processedData;
     }
@@ -235,7 +245,12 @@ class RemoteMediaProcessor {
             JSON.stringify(this.processedData.newyork, null, 2)
         );
 
-        console.log('Dados salvos em public/data/boston.json e public/data/newyork.json');
+        fs.writeFileSync(
+            path.join(dataDir, 'retorno.json'),
+            JSON.stringify(this.processedData.retorno, null, 2)
+        );
+
+        console.log('Dados salvos em data/boston.json, newyork.json e retorno.json');
     }
 
     // Gera estatísticas
@@ -246,12 +261,13 @@ class RemoteMediaProcessor {
             byType: {},
             byCity: {
                 boston: 0,
-                newyork: 0
+                newyork: 0,
+                retorno: 0
             },
             totalSize: 0
         };
 
-        for (const city of ['boston', 'newyork']) {
+        for (const city of ['boston', 'newyork', 'retorno']) {
             for (const item of this.processedData[city].items) {
                 stats.total++;
                 stats.byCity[city]++;

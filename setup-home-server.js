@@ -18,6 +18,7 @@ class HomeServerSetup {
         this.ensureDir(thumbnailsPath);
         this.ensureDir(path.join(serverPath, 'Boston'));
         this.ensureDir(path.join(serverPath, 'NewYork'));
+        this.ensureDir(path.join(serverPath, 'Retorno'));
         
         // Cria subpastas do Boston
         const bostonCategories = [
