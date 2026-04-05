@@ -207,9 +207,9 @@ class RemoteMediaProcessor {
         }
 
         // Ordena por data
-        this.processedData.boston.items.sort((a, b) => new Date(b.date) - new Date(a.date));
-        this.processedData.newyork.items.sort((a, b) => new Date(b.date) - new Date(a.date));
-        this.processedData.retorno.items.sort((a, b) => new Date(b.date) - new Date(a.date));
+        this.processedData.boston.items.sort((a, b) => new Date(a.date) - new Date(b.date));
+        this.processedData.newyork.items.sort((a, b) => new Date(a.date) - new Date(b.date));
+        this.processedData.retorno.items.sort((a, b) => new Date(a.date) - new Date(b.date));
 
         console.log(`Processamento concluído!`);
         console.log(`Boston: ${this.processedData.boston.items.length} itens`);

@@ -6,6 +6,7 @@ export default function Boston() {
       dataUrl="/data/boston.json"
       title="Boston"
       subtitle="Uma seleção de fotos e vídeos tirados durante meu período na cidade."
+      showCategories
     />
   )
 }

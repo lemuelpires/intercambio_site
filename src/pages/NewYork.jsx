@@ -6,6 +6,7 @@ export default function NewYork() {
       dataUrl="/data/newyork.json"
       title="New York"
       subtitle="Momentos marcantes na cidade que nunca dorme."
+      showCategories
     />
   )
 }

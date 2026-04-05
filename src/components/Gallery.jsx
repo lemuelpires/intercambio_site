@@ -1,15 +1,16 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { resolveMediaUrls } from '../utils/mediaUrl'
 
 const ITEMS_PER_PAGE = 20
 
-export default function Gallery({ dataUrl, title, subtitle }) {
+export default function Gallery({ dataUrl, title, subtitle, showCategories = false }) {
   const [config, setConfig] = useState(null)
   const [allItems, setAllItems] = useState([])
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [lightboxItem, setLightboxItem] = useState(null)
+  const [selectedCategory, setSelectedCategory] = useState(null)
 
   const openLightbox = useCallback((item) => {
     setLightboxItem(item)
@@ -22,6 +23,11 @@ export default function Gallery({ dataUrl, title, subtitle }) {
   useEffect(() => {
     setLightboxItem(null)
   }, [page])
+
+  useEffect(() => {
+    setPage(1)
+    setLightboxItem(null)
+  }, [selectedCategory])
 
   useEffect(() => {
     if (!lightboxItem) return undefined
@@ -67,9 +73,30 @@ export default function Gallery({ dataUrl, title, subtitle }) {
     return () => { cancelled = true }
   }, [dataUrl])
 
-  const totalPages = Math.ceil(allItems.length / ITEMS_PER_PAGE)
+  const categories = useMemo(() => {
+    if (!showCategories) return []
+    const map = new Map()
+    allItems.forEach((item) => {
+      const category = item.category || 'Outros'
+      if (!map.has(category)) map.set(category, [])
+      map.get(category).push(item)
+    })
+    return Array.from(map.entries())
+      .map(([name, items]) => ({
+        name,
+        items,
+        count: items.length,
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
+  }, [allItems, showCategories])
+
+  const filteredItems = selectedCategory
+    ? allItems.filter((item) => item.category === selectedCategory)
+    : allItems
+
+  const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE)
   const start = (page - 1) * ITEMS_PER_PAGE
-  const currentItems = allItems.slice(start, start + ITEMS_PER_PAGE)
+  const currentItems = filteredItems.slice(start, start + ITEMS_PER_PAGE)
 
   if (error) {
     return (
@@ -99,6 +126,27 @@ export default function Gallery({ dataUrl, title, subtitle }) {
       </section>
 
       <section className="gallery container">
+        {showCategories && categories.length > 0 && (
+          <div className="gallery-filters">
+            <button
+              type="button"
+              className={`filter-btn ${selectedCategory ? '' : 'active'}`}
+              onClick={() => setSelectedCategory(null)}
+            >
+              Todas
+            </button>
+            {categories.map((category) => (
+              <button
+                key={category.name}
+                type="button"
+                className={`filter-btn ${selectedCategory === category.name ? 'active' : ''}`}
+                onClick={() => setSelectedCategory(category.name)}
+              >
+                {category.name}
+              </button>
+            ))}
+          </div>
+        )}
         {loading ? (
           <div className="loading" style={{ display: 'block' }}>
             <div className="spinner" />
