@@ -9,7 +9,6 @@ jobs:
 build-and-deploy:
 runs-on: ubuntu-latest
 
-```
 steps:
   # 📥 Baixa o código
   - name: Checkout
@@ -56,4 +55,3 @@ steps:
         fi
 
         echo "✅ Deploy finalizado!"
-```
