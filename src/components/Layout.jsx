@@ -38,7 +38,7 @@ export default function Layout() {
       </button>
       <footer className="site-footer">
         <div className="container">
-          <p>{new Date().getFullYear()} Meu IntercÃ¢mbio. Feito com carinho.</p>
+          <p>{new Date().getFullYear()} Meu Intercâmbio. Feito com carinho.</p>
         </div>
       </footer>
     </>
