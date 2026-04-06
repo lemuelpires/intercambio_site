@@ -20,11 +20,13 @@ jobs:
 
       # Build da imagem
       - name: Build Docker image
-        run: docker build -t ${{ secrets.DOCKER_USER }}/galeria-intercambio:latest .
+        run: docker build -t ${{ secrets.DOCKER_USER }}/galeria-intercambio:${{ github.sha }} -t ${{ secrets.DOCKER_USER }}/galeria-intercambio:latest .
 
       # Push da imagem
       - name: Push Docker image
-        run: docker push ${{ secrets.DOCKER_USER }}/galeria-intercambio:latest
+        run: |
+          docker push ${{ secrets.DOCKER_USER }}/galeria-intercambio:${{ github.sha }}
+          docker push ${{ secrets.DOCKER_USER }}/galeria-intercambio:latest
 
       # Deploy no servidor (Docker Swarm)
       - name: Deploy via SSH
@@ -34,7 +36,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            IMAGE=${{ secrets.DOCKER_USER }}/galeria-intercambio:latest
+            IMAGE=${{ secrets.DOCKER_USER }}/galeria-intercambio:${{ github.sha }}
             SERVICE_NAME=galeria-intercambio
 
             echo "Baixando imagem..."
@@ -43,6 +45,7 @@ jobs:
             if docker service inspect $SERVICE_NAME > /dev/null 2>&1; then
               echo "Atualizando servico existente..."
               docker service update \
+                --force \
                 --image $IMAGE \
                 $SERVICE_NAME
             else
