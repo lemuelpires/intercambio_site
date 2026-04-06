@@ -38,6 +38,13 @@ export default function Layout() {
       </button>
       <footer className="site-footer">
         <div className="container">
+          <p>
+            Este site apresenta registros pessoais de uma experiência de intercâmbio. Caso alguém deseje a remoção de
+            alguma imagem em que apareça, entre em contato que a remoção será realizada prontamente.
+          </p>
+          <p>
+            Contato: <a href="mailto:lemuelpires@gmail.com">lemuelpires@gmail.com</a>
+          </p>
           <p>{new Date().getFullYear()} Meu Intercâmbio. Feito com carinho.</p>
         </div>
       </footer>
