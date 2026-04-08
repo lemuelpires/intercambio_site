@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom'
-
-const BOSTON_IMG = 'https://images.unsplash.com/photo-1542567455-cd733f23fbb1?q=80&w=1600&auto=format&fit=crop'
-const NEWYORK_IMG = 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?q=80&w=1600&auto=format&fit=crop'
+import BOSTON_IMG from '../imagens/boston.png'
+import NEWYORK_IMG from '../imagens/newyork.png'
 
 export default function Home() {
   return (

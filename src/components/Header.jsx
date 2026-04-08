@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
+import logoIcon from '../imagens/icones/icone1.png'
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -11,7 +12,10 @@ export default function Header() {
   return (
     <header className="site-header">
       <div className="container header-inner">
-        <NavLink to="/" className="logo">Intercâmbio - CPS</NavLink>
+        <NavLink to="/" className="logo">
+          <img src={logoIcon} alt="Ícone do site" className="logo-icon" />
+          Intercâmbio - CPS
+        </NavLink>
         <button
           className={`menu-toggle ${menuOpen ? 'is-open' : ''}`}
           type="button"

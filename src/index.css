@@ -21,10 +21,32 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background: radial-gradient(circle at top, var(--bg-page-alt) 0, var(--bg-page) 45%, #e5e7eb 100%);
+  min-height: 100%;
+  background-color: var(--bg-page);
+  background-image: url('./imagens/fundo/fundo2.png'), radial-gradient(circle at top, var(--bg-page-alt) 0, var(--bg-page) 45%, #e5e7eb 100%);
+  background-size: cover, cover;
+  background-position: center center, center center;
+  background-repeat: no-repeat, no-repeat;
+  background-attachment: fixed, fixed;
+  background-blend-mode: overlay, normal;
   color: var(--text);
   font-family: "Manrope", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   line-height: 1.6;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.46);
+  pointer-events: none;
+  z-index: 0;
+}
+
+main {
+  position: relative;
+  z-index: 1;
+  backdrop-filter: blur(4px);
 }
 
 .container {
@@ -49,12 +71,22 @@ body {
 }
 
 .logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   color: var(--text);
   text-decoration: none;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   font-size: 14px;
+}
+
+.logo-icon {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: 10px;
 }
 
 .nav {
@@ -123,7 +155,7 @@ body {
 .hero {
   display: grid;
   align-items: center;
-  min-height: 48vh;
+  min-height: 40vh;
   padding: 56px 0 24px;
 }
 
