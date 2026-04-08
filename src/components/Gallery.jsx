@@ -2,6 +2,9 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { resolveMediaUrls } from '../utils/mediaUrl'
 
 const ITEMS_PER_PAGE = 20
+const CATEGORY_LABELS = {
+  'Suprema Corte Michigan': 'Suprema Corte Massachusets',
+}
 
 export default function Gallery({ dataUrl, title, subtitle, showCategories = false }) {
   const [config, setConfig] = useState(null)
@@ -142,7 +145,7 @@ export default function Gallery({ dataUrl, title, subtitle, showCategories = fal
                 className={`filter-btn ${selectedCategory === category.name ? 'active' : ''}`}
                 onClick={() => setSelectedCategory(category.name)}
               >
-                {category.name}
+                {CATEGORY_LABELS[category.name] || category.name}
               </button>
             ))}
           </div>
