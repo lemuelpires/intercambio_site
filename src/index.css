@@ -34,21 +34,6 @@ body {
   line-height: 1.6;
 }
 
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background: rgba(255, 255, 255, 0.46);
-  pointer-events: none;
-  z-index: 0;
-}
-
-main {
-  position: relative;
-  z-index: 1;
-  backdrop-filter: blur(4px);
-}
-
 .container {
   width: min(1120px, 92vw);
   margin: 0 auto;
