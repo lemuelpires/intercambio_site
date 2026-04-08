@@ -175,12 +175,16 @@ body {
 .card-link {
   color: inherit;
   text-decoration: none;
-  display: grid;
+  display: flex;
+  flex-direction: column;
 }
 
 
 .card-media {
-  aspect-ratio: 16/9;
+  width: 100%;
+  height: 0;
+  padding-top: 56.25%;
+  margin: 0;
   background-image: var(--bg);
   background-position: center;
   background-size: cover;
