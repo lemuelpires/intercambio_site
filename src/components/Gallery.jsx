@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { resolveMediaUrls } from '../utils/mediaUrl'
 
 const ITEMS_PER_PAGE = 20
@@ -14,6 +14,7 @@ export default function Gallery({ dataUrl, title, subtitle, showCategories = fal
   const [error, setError] = useState(null)
   const [lightboxItem, setLightboxItem] = useState(null)
   const [selectedCategory, setSelectedCategory] = useState(null)
+  const galleryTopRef = useRef(null)
 
   const openLightbox = useCallback((item) => {
     setLightboxItem(item)
@@ -25,6 +26,11 @@ export default function Gallery({ dataUrl, title, subtitle, showCategories = fal
 
   useEffect(() => {
     setLightboxItem(null)
+    if (galleryTopRef.current) {
+      requestAnimationFrame(() => {
+        galleryTopRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      })
+    }
   }, [page])
 
   useEffect(() => {
@@ -103,7 +109,7 @@ export default function Gallery({ dataUrl, title, subtitle, showCategories = fal
 
   if (error) {
     return (
-      <section className="gallery container">
+      <section className="gallery container" ref={galleryTopRef}>
         <div className="page-hero container">
           <h1>{title}</h1>
           <p>{subtitle}</p>
@@ -173,12 +179,16 @@ export default function Gallery({ dataUrl, title, subtitle, showCategories = fal
                         onClick={() => openLightbox(item)}
                         aria-label={`Ampliar vídeo: ${item.title}`}
                       >
-                        <video
-                          className="gallery-media"
-                          muted
-                          playsInline
-                          preload="metadata"
-                          src={item.src}
+                        <div
+                          className={`gallery-video-thumb ${item.thumb ? 'has-thumb' : 'no-thumb'}`}
+                          style={
+                            item.thumb
+                              ? {
+                                  backgroundImage: `linear-gradient(0deg, rgba(15, 23, 42, 0.25), rgba(15, 23, 42, 0.05)), url('${item.thumb}')`,
+                                }
+                              : undefined
+                          }
+                          aria-hidden="true"
                         />
                       </button>
                     ) : (
