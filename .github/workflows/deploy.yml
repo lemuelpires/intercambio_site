@@ -10,52 +10,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Baixa o codigo
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4 # Atualizado para v4
 
-      # Login no Docker Hub
       - name: Login Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USER }}" --password-stdin
 
-      # Build da imagem
       - name: Build Docker image
-        run: docker build -t ${{ secrets.DOCKER_USER }}/galeria-intercambio:${{ github.sha }} -t ${{ secrets.DOCKER_USER }}/galeria-intercambio:latest .
+        run: docker build -t ${{ secrets.DOCKER_USER }}/galeria-intercambio:latest .
 
-      # Push da imagem
       - name: Push Docker image
-        run: |
-          docker push ${{ secrets.DOCKER_USER }}/galeria-intercambio:${{ github.sha }}
-          docker push ${{ secrets.DOCKER_USER }}/galeria-intercambio:latest
+        run: docker push ${{ secrets.DOCKER_USER }}/galeria-intercambio:latest
 
-      # Deploy no servidor (Docker Swarm)
       - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.0
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            IMAGE=${{ secrets.DOCKER_USER }}/galeria-intercambio:${{ github.sha }}
-            SERVICE_NAME=galeria-intercambio
-
-            echo "Baixando imagem..."
-            docker pull $IMAGE
-
-            if docker service inspect $SERVICE_NAME > /dev/null 2>&1; then
-              echo "Atualizando servico existente..."
-              docker service update \
-                --force \
-                --image $IMAGE \
-                $SERVICE_NAME
-            else
-              echo "Criando novo servico..."
-              docker service create \
-                --name $SERVICE_NAME \
-                --publish 7002:80 \
-                --replicas 1 \
-                $IMAGE
-            fi
-
-            echo "Deploy finalizado!"
-      # trigger
+            # 1. Garante que a imagem nova está no servidor
+            docker pull ${{ secrets.DOCKER_USER }}/galeria-intercambio:latest
+            
+            # 2. Atualiza a Stack (O Swarm detecta a mudança e faz o rolling update)
+            # Isso mantém as labels do Traefik e as redes que estão no seu galerias.yml
+            cd ~/stacks/05-apps
+            docker stack deploy -c galerias.yml galerias
+            
+            echo "Deploy da stack galerias finalizado!"
