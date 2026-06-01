@@ -6,6 +6,16 @@ const CATEGORY_LABELS = {
   'Suprema Corte Michigan': 'Suprema Corte Massachusets',
 }
 
+const VIDEO_THUMB_EXT = /\.(mov|mp4|webm)(?:\?.*)?$/i
+const IMAGE_EXT = /\.(jpe?g|png|webp|avif|gif|svg)(?:\?.*)?$/i
+
+function getVideoPreviewSrc(thumb) {
+  if (!thumb) return ''
+  if (IMAGE_EXT.test(thumb)) return thumb
+  if (VIDEO_THUMB_EXT.test(thumb)) return thumb.replace(VIDEO_THUMB_EXT, '.jpg')
+  return ''
+}
+
 export default function Gallery({ dataUrl, title, subtitle, showCategories = false }) {
   const [config, setConfig] = useState(null)
   const [allItems, setAllItems] = useState([])
@@ -37,20 +47,6 @@ export default function Gallery({ dataUrl, title, subtitle, showCategories = fal
     setPage(1)
     setLightboxItem(null)
   }, [selectedCategory])
-
-  useEffect(() => {
-    if (!lightboxItem) return undefined
-    const onKey = (e) => {
-      if (e.key === 'Escape') closeLightbox()
-    }
-    const prevOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    window.addEventListener('keydown', onKey)
-    return () => {
-      document.body.style.overflow = prevOverflow
-      window.removeEventListener('keydown', onKey)
-    }
-  }, [lightboxItem, closeLightbox])
 
   useEffect(() => {
     let cancelled = false
@@ -102,6 +98,45 @@ export default function Gallery({ dataUrl, title, subtitle, showCategories = fal
   const filteredItems = selectedCategory
     ? allItems.filter((item) => item.category === selectedCategory)
     : allItems
+
+  const lightboxIndex = lightboxItem
+    ? filteredItems.findIndex(
+        (item) =>
+          item.src === lightboxItem.src &&
+          (item.filename || '') === (lightboxItem.filename || '')
+      )
+    : -1
+
+  const showPrevLightbox = lightboxIndex > 0
+  const showNextLightbox = lightboxIndex >= 0 && lightboxIndex < filteredItems.length - 1
+
+  const openPrevLightbox = useCallback(() => {
+    if (showPrevLightbox) {
+      setLightboxItem(filteredItems[lightboxIndex - 1])
+    }
+  }, [filteredItems, lightboxIndex, showPrevLightbox])
+
+  const openNextLightbox = useCallback(() => {
+    if (showNextLightbox) {
+      setLightboxItem(filteredItems[lightboxIndex + 1])
+    }
+  }, [filteredItems, lightboxIndex, showNextLightbox])
+
+  useEffect(() => {
+    if (!lightboxItem) return undefined
+    const onKey = (e) => {
+      if (e.key === 'Escape') closeLightbox()
+      if (e.key === 'ArrowLeft') openPrevLightbox()
+      if (e.key === 'ArrowRight') openNextLightbox()
+    }
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', onKey)
+    return () => {
+      document.body.style.overflow = prevOverflow
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [lightboxItem, closeLightbox, openPrevLightbox, openNextLightbox])
 
   const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE)
   const start = (page - 1) * ITEMS_PER_PAGE
@@ -179,17 +214,7 @@ export default function Gallery({ dataUrl, title, subtitle, showCategories = fal
                         onClick={() => openLightbox(item)}
                         aria-label={`Ampliar vídeo: ${item.title}`}
                       >
-                        <div
-                          className={`gallery-video-thumb ${item.thumb ? 'has-thumb' : 'no-thumb'}`}
-                          style={
-                            item.thumb
-                              ? {
-                                  backgroundImage: `linear-gradient(0deg, rgba(15, 23, 42, 0.25), rgba(15, 23, 42, 0.05)), url('${item.thumb}')`,
-                                }
-                              : undefined
-                          }
-                          aria-hidden="true"
-                        />
+                        <GalleryVideoThumbnail item={item} />
                       </button>
                     ) : (
                       <GalleryImage
@@ -251,6 +276,20 @@ export default function Gallery({ dataUrl, title, subtitle, showCategories = fal
             aria-label={lightboxItem.title}
             onClick={(e) => e.stopPropagation()}
           >
+            {showPrevLightbox && (
+              <button
+                type="button"
+                className="lightbox-nav lightbox-nav--prev"
+                aria-label="Imagem anterior"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  openPrevLightbox()
+                }}
+              >
+                ‹
+              </button>
+            )}
+
             {lightboxItem.type === 'video' ? (
               <video
                 className="lightbox-media"
@@ -266,6 +305,20 @@ export default function Gallery({ dataUrl, title, subtitle, showCategories = fal
                 alt={lightboxItem.title}
               />
             )}
+
+            {showNextLightbox && (
+              <button
+                type="button"
+                className="lightbox-nav lightbox-nav--next"
+                aria-label="Próxima imagem"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  openNextLightbox()
+                }}
+              >
+                ›
+              </button>
+            )}
           </div>
         </div>
       ) : null}
@@ -273,10 +326,41 @@ export default function Gallery({ dataUrl, title, subtitle, showCategories = fal
   )
 }
 
+function GalleryVideoThumbnail({ item }) {
+  const [previewError, setPreviewError] = useState(false)
+  const previewSrc = getVideoPreviewSrc(item.thumb)
+  const showImagePreview = previewSrc && !previewError
+
+  return (
+    <div
+      className={`gallery-video-thumb ${showImagePreview ? 'has-thumb' : 'fallback'}`}
+      aria-hidden="true"
+    >
+      {showImagePreview ? (
+        <img
+          className="gallery-video-thumb-image"
+          src={previewSrc}
+          alt={`Prévia de vídeo: ${item.title}`}
+          loading="lazy"
+          decoding="async"
+          onError={() => setPreviewError(true)}
+        />
+      ) : (
+        <div className="gallery-video-thumb-placeholder" />
+      )}
+
+      <div className="gallery-video-thumb-overlay" />
+      <div className="gallery-video-thumb-label">Vídeo</div>
+    </div>
+  )
+}
+
 function GalleryImage({ item, useThumbnails = true, onOpen }) {
   const [imgError, setImgError] = useState(false)
   const thumb = item.thumb || item.src
   const gridSrc = !useThumbnails || imgError ? item.src : thumb
+  const width = item.tw || 400
+  const height = item.th || 300
 
   return (
     <button
@@ -288,8 +372,11 @@ function GalleryImage({ item, useThumbnails = true, onOpen }) {
       <img
         className="gallery-media"
         src={gridSrc}
-        alt=""
+        alt={item.title || ''}
+        width={width}
+        height={height}
         loading="lazy"
+        decoding="async"
         onError={() => setImgError(true)}
       />
     </button>

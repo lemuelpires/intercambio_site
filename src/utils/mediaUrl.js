@@ -21,6 +21,19 @@ function resolveToBaseUrl(url, base) {
   return url
 }
 
+function resolveThumbUrl(thumb, src, type, base) {
+  const imageExt = /\.(jpe?g|png|webp|avif|gif|svg)(?:\?|$)/i
+  const videoExt = /\.(mov|mp4|webm)(?:\?|$)/i
+
+  if (!thumb) return ''
+  if (imageExt.test(thumb)) return resolveToBaseUrl(thumb, base)
+  if (videoExt.test(thumb)) {
+    return resolveToBaseUrl(thumb.replace(videoExt, '.jpg'), base)
+  }
+  if (thumb !== src) return resolveToBaseUrl(thumb, base)
+  return type === 'video' ? '' : resolveToBaseUrl(src, base)
+}
+
 export function resolveMediaUrls(items, mediaBaseUrl) {
   if (mediaBaseUrl == null || String(mediaBaseUrl).trim() === '') return items
   const base = String(mediaBaseUrl).replace(/\/$/, '')
@@ -29,8 +42,7 @@ export function resolveMediaUrls(items, mediaBaseUrl) {
     const src = item.src || ''
     const resolvedSrc = resolveToBaseUrl(src, base)
     const thumb = item.thumb || ''
-    const resolvedThumb =
-      thumb && thumb !== src ? resolveToBaseUrl(thumb, base) : resolvedSrc
+    const resolvedThumb = resolveThumbUrl(thumb, src, item.type, base) || (item.type === 'video' ? '' : resolvedSrc)
     return { ...item, src: resolvedSrc, thumb: resolvedThumb }
   })
 }
