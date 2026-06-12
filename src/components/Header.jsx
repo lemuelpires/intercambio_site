@@ -32,7 +32,7 @@ export default function Header() {
           <NavLink to="/" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} end onClick={handleNavClick}>Home</NavLink>
           <NavLink to="/boston" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={handleNavClick}>Boston</NavLink>
           <NavLink to="/newyork" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={handleNavClick}>New York</NavLink>
-          <NavLink to="/retorno" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={handleNavClick}>Chegada ao Brasil</NavLink>
+          <NavLink to="/retorno" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={handleNavClick}>De volta ao Brasil</NavLink>
         </nav>
       </div>
     </header>
