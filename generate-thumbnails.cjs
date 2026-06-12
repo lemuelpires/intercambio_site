@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { execFileSync } = require('child_process');
 
 class ThumbnailGenerator {
     constructor(mediaPath) {
@@ -23,9 +24,29 @@ class ThumbnailGenerator {
         return ['.jpg', '.jpeg', '.png', '.heic', '.webp'].includes(ext);
     }
 
+    // Verifica se é um vídeo
+    isVideo(filename) {
+        const ext = path.extname(filename).toLowerCase();
+        return ['.mp4', '.mov', '.avi', '.mkv', '.webm'].includes(ext);
+    }
+
+    // Verifica se FFmpeg está disponível
+    canUseFfmpeg() {
+        try {
+            execFileSync('ffmpeg', ['-version'], { stdio: 'ignore' });
+            return true;
+        } catch (error) {
+            return false;
+        }
+    }
+
     // Gera thumbnail usando Canvas (se disponível) ou fallback
     async generateThumbnail(sourcePath, targetPath, width = 400, height = 300) {
         try {
+            if (this.isVideo(sourcePath)) {
+                return await this.generateVideoThumbnail(sourcePath, targetPath, width, height);
+            }
+
             // Tenta usar sharp se disponível
             if (this.canUseSharp()) {
                 return await this.generateThumbnailSharp(sourcePath, targetPath, width, height);
@@ -35,6 +56,31 @@ class ThumbnailGenerator {
             return await this.copyAsThumbnail(sourcePath, targetPath);
         } catch (error) {
             console.error(`Erro ao gerar thumbnail para ${sourcePath}:`, error.message);
+            this.errorCount++;
+            return false;
+        }
+    }
+
+    async generateVideoThumbnail(sourcePath, targetPath, width = 400, height = 300) {
+        if (!this.canUseFfmpeg()) {
+            console.warn(`FFmpeg não disponível. Não foi possível gerar thumbnail de vídeo para ${sourcePath}`);
+            return false;
+        }
+
+        try {
+            execFileSync('ffmpeg', [
+                '-hide_banner',
+                '-loglevel', 'error',
+                '-ss', '00:00:01',
+                '-i', sourcePath,
+                '-frames:v', '1',
+                '-q:v', '2',
+                '-vf', `thumbnail,scale=${width}:${height}:force_original_aspect_ratio=decrease,pad=${width}:${height}:(ow-iw)/2:(oh-ih)/2,format=yuv420p`,
+                targetPath
+            ], { stdio: 'inherit' });
+            return true;
+        } catch (error) {
+            console.error(`Erro ao gerar thumbnail de vídeo para ${sourcePath}:`, error.message || error);
             this.errorCount++;
             return false;
         }
@@ -106,9 +152,14 @@ class ThumbnailGenerator {
                 if (item.isDirectory()) {
                     // Processa subpastas recursivamente
                     await this.processFolder(fullPath);
-                } else if (item.isFile() && this.isImage(item.name)) {
-                    // Gera thumbnail para imagem
-                    await this.processImage(fullPath);
+                } else if (item.isFile()) {
+                    if (this.isImage(item.name)) {
+                        // Gera thumbnail para imagem
+                        await this.processImage(fullPath);
+                    } else if (this.isVideo(item.name)) {
+                        // Gera thumbnail para vídeo
+                        await this.processVideo(fullPath);
+                    }
                 }
             }
         } catch (error) {
@@ -136,6 +187,26 @@ class ThumbnailGenerator {
         if (success) {
             this.processedCount++;
             console.log(`✓ Thumbnail gerado: ${filename}`);
+        }
+    }
+
+    async processVideo(videoPath) {
+        const filename = path.basename(videoPath);
+        const relativePath = path.relative(this.mediaPath, videoPath);
+        const thumbnailPath = path.join(this.thumbnailsPath, relativePath).replace(/\.[^/.]+$/, '.jpg');
+        this.ensureDir(path.dirname(thumbnailPath));
+
+        // Verifica se o thumbnail já existe
+        if (fs.existsSync(thumbnailPath)) {
+            this.skippedCount++;
+            return;
+        }
+
+        // Gera o thumbnail de vídeo
+        const success = await this.generateThumbnail(videoPath, thumbnailPath);
+        if (success) {
+            this.processedCount++;
+            console.log(`✓ Thumbnail de vídeo gerado: ${filename}`);
         }
     }
 
@@ -169,7 +240,7 @@ async function main() {
     const mediaPath = path.join(process.cwd(), 'media');
     
     if (!fs.existsSync(mediaPath)) {
-        console.error('Pasta de mídia não encontrada. Execute primeiro o copy-media.js');
+        console.error('Pasta de mídia não encontrada. Execute primeiro o copy-media.cjs');
         return;
     }
     

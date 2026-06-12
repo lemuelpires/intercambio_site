@@ -28,13 +28,21 @@ class MediaProcessor {
     // Detecta o tipo de mídia
     getMediaType(filename) {
         const ext = path.extname(filename).toLowerCase();
-        if (['.mp4', '.mov', '.avi', '.mkv'].includes(ext)) {
+        if (['.mp4', '.mov', '.avi', '.mkv', '.webm'].includes(ext)) {
             return 'video';
         }
         if (['.jpg', '.jpeg', '.png', '.heic', '.webp'].includes(ext)) {
             return 'photo';
         }
         return 'unknown';
+    }
+
+    // Formata o caminho do thumbnail para vídeos como JPG
+    getThumbnailPath(relativePath, type) {
+        if (type === 'video') {
+            return relativePath.replace(/\.[^/.]+$/, '.jpg');
+        }
+        return relativePath;
     }
 
     // Extrai data do nome do arquivo
@@ -93,12 +101,14 @@ class MediaProcessor {
         const stats = fs.statSync(filePath);
         
         const relPosix = relativePath.replace(/\\/g, '/');
+        const mediaType = this.getMediaType(filename);
+        const thumbnailPath = this.getThumbnailPath(relPosix, mediaType);
         const mediaItem = {
             src: `media/${relPosix}`,
-            thumb: `media/thumbnails/${relPosix}`,
+            thumb: `media/thumbnails/${thumbnailPath}`,
             filename: filename,
             device: this.detectDevice(filename),
-            type: this.getMediaType(filename),
+            type: mediaType,
             category: category,
             size: stats.size,
             date: this.extractDate(filename) || stats.mtime,

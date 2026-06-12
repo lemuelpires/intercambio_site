@@ -54,9 +54,9 @@ const requiredFiles = [
     'newyork.html',
     'styles.css',
     'gallery.js',
-    'media-processor.js',
-    'copy-media.js',
-    'generate-thumbnails.js',
+    'media-processor.cjs',
+    'copy-media.cjs',
+    'generate-thumbnails.cjs',
     'config.json',
     'package.json'
 ];

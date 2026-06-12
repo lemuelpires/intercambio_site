@@ -109,7 +109,7 @@ app.listen(PORT, '0.0.0.0', () => {
 
 module.exports = app;`;
 
-        fs.writeFileSync('home-server.js', serverScript);
+        fs.writeFileSync('home-server.cjs', serverScript);
         console.log('✓ Script do servidor web criado');
     }
 
@@ -119,10 +119,10 @@ module.exports = app;`;
             name: "intercambio-home-server",
             version: "1.0.0",
             description: "Servidor pessoal para mídias do intercâmbio",
-            main: "home-server.js",
+            main: "home-server.cjs",
             scripts: {
-                start: "node home-server.js",
-                dev: "nodemon home-server.js"
+                start: "node home-server.cjs",
+                dev: "nodemon home-server.cjs"
             },
             dependencies: {
                 express: "^4.18.2",
