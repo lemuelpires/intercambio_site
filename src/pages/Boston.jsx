@@ -7,6 +7,7 @@ export default function Boston() {
       title="Boston"
       subtitle="Uma seleção de fotos e vídeos tirados durante meu período na cidade."
       showCategories
+      
     />
   )
 }
